@@ -28,6 +28,7 @@ class Program
             {
 
                 Console.WriteLine("Accepted... WELCOME!");
+                Console.WriteLine("Hit enter to continue!");
                 Console.ReadKey();
                 break;
             }
@@ -105,7 +106,31 @@ class Program
 
     public static void AddDrug(bool existing)
     {
+        //Adds a drug to the text file
+        //Format for drugs is
+        //Name|Amount|PackagedDate|ExpiriyDate
+        Console.WriteLine("Enter the name of your drug: ");
+        string name = Console.ReadLine();
         
+        Console.WriteLine("Enter the amount of your drug: ");
+        string amount = Console.ReadLine();
+        
+        Console.WriteLine("Enter the packaged date: ");
+        string packaged = Console.ReadLine();
+        
+        Console.WriteLine("Enter the expiry date: ");
+        string expiry = Console.ReadLine();
+
+        using (StreamWriter writer = new StreamWriter("../../../drugs.txt", true))
+        {
+
+            writer.Write($"{name}|{amount}|{packaged}|{expiry}");
+            writer.Write(Environment.NewLine);
+            writer.Flush();
+            writer.Close();
+        }
+
+        Console.WriteLine("Drug has been added!");
         Console.WriteLine("Hit enter to return to main menu: ");
         Console.ReadKey();
         MainMenu();
