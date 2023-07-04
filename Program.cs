@@ -13,6 +13,7 @@ class Program
     public static void login()
     {
 
+        Console.Clear();
         string username = "ILove";
         string password = "Drugs";
         int attempts = 3;
@@ -64,21 +65,29 @@ class Program
         Console.WriteLine("5. Exit");
         string choice = Console.ReadLine();
 
-        if (choice == "1") {
-            
-            ListDrugs();
-        } else if (choice == "2") {
-            
-            AddDrug(false);
-        } else if (choice == "3") {
-            
-            AddDrug(true);
-        } else if (choice == "4") {
-            
-            WithdrawDrug();
-        } else if (choice == "5")
+        if (choice == "1")
         {
-            
+
+            ListDrugs();
+        }
+        else if (choice == "2")
+        {
+
+            AddDrug(false);
+        }
+        else if (choice == "3")
+        {
+
+            AddDrug(true);
+        }
+        else if (choice == "4")
+        {
+
+            WithdrawDrug();
+        }
+        else if (choice == "5")
+        {
+
             Console.WriteLine("Bye Bye!");
             Console.ReadKey();
             Environment.Exit(0);
@@ -87,17 +96,17 @@ class Program
 
     public static void ListDrugs()
     {
-        
+
         //Format for drugs is
         //Name|Amount|PackagedDate|ExpiriyDate
-        string[] lines = File.ReadAllLines("../../../drugs.txt");
+        string[] lines = File.ReadAllLines("drugs.txt");
         Console.WriteLine("The current drugs in stock are:");
         for (int i = 0; i < lines.Length; i++)
         {
 
             string[] splitDrugDetails = lines[i].Split("|");
             Console.WriteLine($"Name: {splitDrugDetails[0]} Amount: {splitDrugDetails[1]} Packaged Date: {splitDrugDetails[2]} Expiry Date: {splitDrugDetails[3]}");
-            
+
         }
         Console.WriteLine("Hit enter to return to main menu: ");
         Console.ReadKey();
@@ -111,23 +120,31 @@ class Program
         //Name|Amount|PackagedDate|ExpiriyDate
         Console.WriteLine("Enter the name of your drug: ");
         string name = Console.ReadLine();
-        
+
         Console.WriteLine("Enter the amount of your drug: ");
         string amount = Console.ReadLine();
-        
+
         Console.WriteLine("Enter the packaged date: ");
         string packaged = Console.ReadLine();
-        
+
         Console.WriteLine("Enter the expiry date: ");
         string expiry = Console.ReadLine();
 
-        using (StreamWriter writer = new StreamWriter("../../../drugs.txt", true))
+        if (!existing)
+        {
+            using (StreamWriter writer = new StreamWriter("drugs.txt", true))
+            {
+
+                writer.Write($"{name}|{amount}|{packaged}|{expiry}");
+                writer.Write(Environment.NewLine);
+                writer.Flush();
+                writer.Close();
+            }
+        }
+        else
         {
 
-            writer.Write($"{name}|{amount}|{packaged}|{expiry}");
-            writer.Write(Environment.NewLine);
-            writer.Flush();
-            writer.Close();
+
         }
 
         Console.WriteLine("Drug has been added!");
@@ -138,7 +155,7 @@ class Program
 
     public static void WithdrawDrug()
     {
-        
+        //Removes a drug as per the name
         Console.WriteLine("Hit enter to return to main menu: ");
         Console.ReadKey();
         MainMenu();
