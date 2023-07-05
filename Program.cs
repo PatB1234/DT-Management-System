@@ -6,14 +6,14 @@ class Program
     static void Main(string[] args)
     {
 
-        login();
+        Console.Clear();
+        //login();
         MainMenu();
     }
 
     public static void login()
     {
 
-        Console.Clear();
         string username = "ILove";
         string password = "Drugs";
         int attempts = 3;
@@ -156,6 +156,61 @@ class Program
     public static void WithdrawDrug()
     {
         //Removes a drug as per the name
+        Console.Clear();
+
+        Console.WriteLine("Enter the name of the drug: ");
+        string name = Console.ReadLine();
+
+        Console.WriteLine("Enter the amount you would like to withdraw: ");
+        int amount = int.Parse(Console.ReadLine());
+
+        string[] lines = File.ReadAllLines("drugs.txt");
+        bool found = false;
+        string content = "";
+        string[] contentArr = { };
+        int totalAmount = 0;
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+
+            string[] splitDrugDetails = lines[i].Split("|");
+            if (splitDrugDetails[0] == name)
+            {
+
+                contentArr = splitDrugDetails;
+                content = lines[i];
+                totalAmount = int.Parse(splitDrugDetails[1]);
+                found = true;
+                if (totalAmount < amount)
+                {
+
+                    Console.WriteLine("There is not enough of the medicine");
+                }
+                else
+                {
+
+                    totalAmount -= amount;
+                    var line = File.ReadAllLines("drugs.txt").Where(line => line.Trim() != content).ToArray();
+                    File.WriteAllLines("drugs.txt", line);
+                    using (StreamWriter writer = new StreamWriter("drugs.txt", true))
+                    {
+
+                        writer.Write($"{name}|{totalAmount}|{contentArr[2]}|{contentArr[3]}");
+                        writer.Write(Environment.NewLine);
+                        writer.Flush();
+                        writer.Close();
+                    }
+                }
+            }
+
+        }
+
+        if (found == false)
+        {
+
+            Console.WriteLine("The specified drug could not be found");
+        }
+
         Console.WriteLine("Hit enter to return to main menu: ");
         Console.ReadKey();
         MainMenu();
