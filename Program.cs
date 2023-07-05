@@ -124,14 +124,16 @@ class Program
         Console.WriteLine("Enter the amount of your drug: ");
         string amount = Console.ReadLine();
 
-        Console.WriteLine("Enter the packaged date: ");
-        string packaged = Console.ReadLine();
-
-        Console.WriteLine("Enter the expiry date: ");
-        string expiry = Console.ReadLine();
 
         if (!existing)
         {
+
+            Console.WriteLine("Enter the packaged date: ");
+            string packaged = Console.ReadLine();
+
+            Console.WriteLine("Enter the expiry date: ");
+            string expiry = Console.ReadLine();
+
             using (StreamWriter writer = new StreamWriter("drugs.txt", true))
             {
 
@@ -144,10 +146,45 @@ class Program
         else
         {
 
+            string[] lines = File.ReadAllLines("drugs.txt");
+            bool found = false;
+            string content = "";
+            string[] contentArr = { };
+            int totalAmount = 0;
 
+            for (int i = 0; i < lines.Length; i++)
+            {
+
+                string[] splitDrugDetails = lines[i].Split("|");
+                if (splitDrugDetails[0] == name)
+                {
+
+                    found = true;
+                    totalAmount = int.Parse(splitDrugDetails[1]);
+                    totalAmount += int.Parse(amount);
+                    content = lines[i];
+                    contentArr = splitDrugDetails;
+                    var line = File.ReadAllLines("drugs.txt").Where(line => line.Trim() != content).ToArray();
+                    File.WriteAllLines("drugs.txt", line);
+                    using (StreamWriter writer = new StreamWriter("drugs.txt", true))
+                    {
+
+                        writer.Write($"{name}|{totalAmount}|{contentArr[2]}|{contentArr[3]}");
+                        writer.Write(Environment.NewLine);
+                        writer.Flush();
+                        writer.Close();
+                    }
+                    Console.WriteLine("Drug has been added!");
+                }
+            }
+
+            if (found == false)
+            {
+
+                Console.WriteLine("The specified drug could not be found");
+            }
         }
 
-        Console.WriteLine("Drug has been added!");
         Console.WriteLine("Hit enter to return to main menu: ");
         Console.ReadKey();
         MainMenu();
