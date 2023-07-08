@@ -184,7 +184,6 @@ fn add_exisiting_drug() -> std::io::Result<()> {
             let _ = file.write_all(n.as_bytes());
         }
     }
-    println!("{:?}", arr);
     println!("Hit enter to return to main menu: ");
     io::stdin().read_line(&mut String::new()).unwrap();
     main_menu();
