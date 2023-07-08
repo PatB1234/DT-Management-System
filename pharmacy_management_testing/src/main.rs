@@ -1,6 +1,6 @@
 use std::fs::{File, OpenOptions};
 use std::io;
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Write};
 // fn read() -> std::io::Result<()> {
 //     let file: File = File::open("./src/drugs.txt")?;
 
@@ -30,6 +30,16 @@ fn print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
 }
 
+fn take_input() -> String {
+    let mut u_input: String = String::new();
+    io::stdin()
+        .read_line(&mut u_input)
+        .expect("Something went wrong");
+    let len = u_input.trim_end().len();
+    u_input.truncate(len);
+    u_input
+}
+
 fn login() {}
 fn main_menu() {
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
@@ -47,7 +57,7 @@ fn main_menu() {
         .expect("Failed to read line");
     let choice = choice.trim_end();
     if choice == "1" {
-        list_drug();
+        let _ = list_drug();
     } else if choice == "2" {
         add_drug(false);
     } else if choice == "3" {
@@ -84,6 +94,36 @@ fn list_drug() -> std::io::Result<()> {
     Ok(())
 }
 
-fn add_drug(existing: bool) {}
+fn add_drug(existing: bool) {
+    println!("Enter the name of your drug: ");
+    let name = take_input();
+
+    println!("Enter the amount of your drug: ");
+    let amount = take_input();
+
+    if existing == false {
+        println!("Enter the packaged date: ");
+        let packaged = take_input();
+
+        println!("Enter the expiry date: ");
+        let expiry = take_input();
+
+        let mut file = OpenOptions::new()
+            .write(true)
+            .append(true)
+            .open("./src/drugs.txt")
+            .unwrap();
+        let s: String = format!("{name}|{amount}|{packaged}|{expiry}\n");
+        // if let Err(e) = writeln!(file, "TESTING") {
+        //     eprintln!("Couldn't write to file: {}", e);
+        // }
+        let _ = file.write_all(s.as_bytes());
+    } else {
+    }
+
+    println!("Hit enter to return to main menu: ");
+    io::stdin().read_line(&mut String::new()).unwrap();
+    main_menu();
+}
 
 fn withdraw_drug() {}

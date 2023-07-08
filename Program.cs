@@ -128,7 +128,7 @@ class Program
         if (!existing)
         {
 
-            Console.WriteLine("Enter the packaged date: ");
+            Console.WriteLine();
             string packaged = Console.ReadLine();
 
             Console.WriteLine("Enter the expiry date: ");
