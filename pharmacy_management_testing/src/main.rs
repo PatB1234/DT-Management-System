@@ -1,7 +1,7 @@
 use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io;
-use std::io::{prelude::*, BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader, Write};
 // fn read() -> std::io::Result<()> {
 //     let file: File = File::open("./src/drugs.txt")?;
 
@@ -73,7 +73,7 @@ fn main_menu() {
     } else if choice == "2" {
         add_drug();
     } else if choice == "3" {
-        add_exisiting_drug();
+        let _ = add_exisiting_drug();
     } else if choice == "4" {
         withdraw_drug();
     } else if choice == "5" {
@@ -156,12 +156,12 @@ fn add_exisiting_drug() -> std::io::Result<()> {
 
         if a == name {
             found = true;
-            let totalAmount: i32 = b.parse().unwrap();
-            let totalAmount: i32 = totalAmount + amount;
+            let total_amount: i32 = b.parse().unwrap();
+            let total_amount: i32 = total_amount + amount;
             let names = a;
             let packaged = c;
             let expiry = d;
-            arr[iter] = format!("{}|{}|{}|{}", names, totalAmount, packaged, expiry);
+            arr[iter] = format!("{}|{}|{}|{}", names, total_amount, packaged, expiry);
         } else {
             arr[iter] = s;
         }
