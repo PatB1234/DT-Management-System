@@ -117,7 +117,7 @@ class Program
     {
         //Adds a drug to the text file
         //Format for drugs is
-        //Name|Amount|PackagedDate|ExpiriyDate
+        //Name|Amount|PackagedDate|ExpiryDate
         Console.WriteLine("Enter the name of your drug: ");
         string name = Console.ReadLine();
 
