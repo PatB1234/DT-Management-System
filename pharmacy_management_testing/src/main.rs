@@ -114,9 +114,6 @@ fn add_drug(existing: bool) {
             .open("./src/drugs.txt")
             .unwrap();
         let s: String = format!("{name}|{amount}|{packaged}|{expiry}\n");
-        // if let Err(e) = writeln!(file, "TESTING") {
-        //     eprintln!("Couldn't write to file: {}", e);
-        // }
         let _ = file.write_all(s.as_bytes());
     } else {
     }
