@@ -1,7 +1,7 @@
-use std::fs;
-use std::fs::{File, OpenOptions};
+use dotenv::dotenv;
+use postgres::{Client, Error, NoTls};
 use std::io;
-use std::io::{BufRead, BufReader, Write};
+
 // fn read() -> std::io::Result<()> {
 //     let file: File = File::open("./src/drugs.txt")?;
 
@@ -22,24 +22,57 @@ use std::io::{BufRead, BufReader, Write};
 //     file.write_all(b"PLACEHOLDER1\n");
 //     file.write_all(b"PLACEHOLDER2\n");
 // }
+// fn main() -> Result<(), Error> {
+//     let mut client = Client::connect("postgresql://postgres:postgres@localhost/library", NoTls)?;
+
+//     client.batch_execute(
+//         "
+//         CREATE TABLE IF NOT EXISTS author (
+//             id              SERIAL PRIMARY KEY,
+//             name            VARCHAR NOT NULL,
+//             country         VARCHAR NOT NULL
+//             )
+//     ",
+//     )?;
+
+//     client.batch_execute(
+//         "
+//         CREATE TABLE IF NOT EXISTS book  (
+//             id              SERIAL PRIMARY KEY,
+//             title           VARCHAR NOT NULL,
+//             author_id       INTEGER NOT NULL REFERENCES author
+//             )
+//     ",
+//     )?;
+
+//     Ok(())
+// }
+struct Drugs {
+    name: String,
+    amount: String,
+    pckg_date: String,
+    expiry_date: String,
+    _id: String,
+}
 fn main() {
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+    let _ = create_tables();
     login();
     main_menu();
 }
+
+fn create_tables() -> Result<(), Error> {
+    let mut client = Client::connect(
+        "postgres://jnmuchkv:CSMms0y5t6sD9ESRcqFrFtfdzzOz4BMG@stampy.db.elephantsql.com/jnmuchkv",
+        NoTls,
+    )?;
+
+    client.batch_execute("CREATE TABLE IF NOT EXISTS drugs (name TEXT, amount TEXT, package_date TEXT, expiry_date TEXT, id TEXT)")?;
+
+    Ok(())
+}
 fn print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
-}
-
-fn get_num_lines() -> usize {
-    let file = BufReader::new(File::open("./src/drugs.txt").expect("Unable to open file"));
-    let mut cnt: usize = 0;
-
-    for _ in file.lines() {
-        cnt = cnt + 1;
-    }
-
-    cnt
 }
 
 fn take_input() -> String {
@@ -54,6 +87,7 @@ fn take_input() -> String {
 
 fn login() {}
 fn main_menu() {
+    dotenv().ok();
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
     println!("Main Menu");
     println!("What would you like to do?");
@@ -62,6 +96,7 @@ fn main_menu() {
     println!("3. Add a existing drug");
     println!("4. Withdraw a Drug");
     println!("5. Exit");
+    let db_url: String = std::env::var("DB_URL").expect("DB_URL must be set.");
 
     let mut choice = String::new();
     io::stdin()
@@ -69,35 +104,36 @@ fn main_menu() {
         .expect("Failed to read line");
     let choice = choice.trim_end();
     if choice == "1" {
-        let _ = list_drug();
+        let _ = list_drug(db_url);
     } else if choice == "2" {
-        add_drug();
+        let _ = add_drug(db_url);
     } else if choice == "3" {
-        let _ = add_exisiting_drug();
+        let _ = add_exisiting_drug(db_url);
     } else if choice == "4" {
-        withdraw_drug();
+        withdraw_drug(db_url);
     } else if choice == "5" {
         println!("Bye Bye!");
         std::process::exit(0x0100);
     }
 }
 
-fn list_drug() -> std::io::Result<()> {
-    let file = File::open("./src/drugs.txt").unwrap();
-    let reader = BufReader::new(file);
-    println!("The current drugs in stock are:");
-    for line in reader.lines() {
-        let s = line.unwrap();
-        let split = s.split("|");
-        let split = split.collect::<Vec<&str>>();
-        let a = split[0];
-        let b = split[1];
-        let c = split[2];
-        let d = split[3];
+fn list_drug(db_url: String) -> Result<(), Error> {
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
 
+    for row in client.query(
+        "SELECT name, amount, package_date, expiry_date, id FROM drugs",
+        &[],
+    )? {
+        let data = Drugs {
+            name: row.get(0),
+            amount: row.get(1),
+            pckg_date: row.get(2),
+            expiry_date: row.get(3),
+            _id: row.get(4),
+        };
         println!(
-            "Name: {} Amount: {} Packaged Date: {} Expiry Date: {}",
-            a, b, c, d
+            "Name: {} Amount: {} Packaged Date: {} Expiry Date: {} ID: {}",
+            data.name, data.amount, data.pckg_date, data.expiry_date, data._id
         )
     }
     println!("Hit enter to return to main menu: ");
@@ -106,12 +142,14 @@ fn list_drug() -> std::io::Result<()> {
     Ok(())
 }
 
-fn add_drug() {
+fn add_drug(db_url: String) -> Result<(), Error> {
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
+
     println!("Enter the name of your drug: ");
-    let name = take_input();
+    let names = take_input();
 
     println!("Enter the amount of your drug: ");
-    let amount = take_input();
+    let amounts = take_input();
 
     println!("Enter the packaged date: ");
     let packaged = take_input();
@@ -119,74 +157,51 @@ fn add_drug() {
     println!("Enter the expiry date: ");
     let expiry = take_input();
 
-    let mut file = OpenOptions::new()
-        .write(true)
-        .append(true)
-        .open("./src/drugs.txt")
-        .unwrap();
-    let s: String = format!("{name}|{amount}|{packaged}|{expiry}\n");
-    let _ = file.write_all(s.as_bytes());
+    println!("Enter the id: ");
+    let _ids = take_input();
+    let data = Drugs {
+        name: names,
+        amount: amounts,
+        pckg_date: packaged,
+        expiry_date: expiry,
+        _id: _ids,
+    };
+
+    client.execute(
+            "INSERT INTO drugs (name, amount, package_date, expiry_date, id) VALUES ($1, $2, $3, $4, $5)",
+            &[&data.name, &data.amount, &data.pckg_date, &data.expiry_date, &data._id],
+        )?;
 
     println!("Hit enter to return to main menu: ");
     io::stdin().read_line(&mut String::new()).unwrap();
     main_menu();
+
+    Ok(())
 }
 
-fn add_exisiting_drug() -> std::io::Result<()> {
-    let file: File = File::open("./src/drugs.txt")?;
-    let reader = BufReader::new(file);
-
-    println!("Enter the name of your drug: ");
-    let name = take_input();
+fn add_exisiting_drug(db_url: String) -> Result<(), Error> {
+    // let file: File = File::open("./src/drugs.txt")?;
+    // let reader = BufReader::new(file);
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
+    println!("Enter the id of your drug: ");
+    let id = take_input();
 
     println!("Enter the amount of your drug: ");
     let amount: i32 = take_input().parse().unwrap();
 
-    let mut found = false;
-    let mut arr = vec![String::new(); get_num_lines()];
-    let mut iter = 0;
-    for line in reader.lines() {
-        let s = line.unwrap();
-        let split = s.split("|");
-        let split = split.collect::<Vec<&str>>();
-        let a = split[0];
-        let b = split[1];
-        let c = split[2];
-        let d = split[3];
-
-        if a == name {
-            found = true;
-            let total_amount: i32 = b.parse().unwrap();
-            let total_amount: i32 = total_amount + amount;
-            let names = a;
-            let packaged = c;
-            let expiry = d;
-            arr[iter] = format!("{}|{}|{}|{}", names, total_amount, packaged, expiry);
-        } else {
-            arr[iter] = s;
-        }
-        iter += 1;
+    let mut curr_amount: i32;
+    for row in client.query("SELECT * FROM drugs WHERE id=$1", &[&id])? {
+        let s: String = row.get(1);
+        curr_amount = s.parse().unwrap();
+        let i = curr_amount + amount;
+        let i = i.to_string();
+        println!("{}", i);
+        client.execute("UPDATE drugs SET amount=$1 WHERE id=$2", &[&i, &id])?;
     }
 
-    if found == false {
-        println!("ERROR: Could not find specified drug");
-    } else {
-        fs::remove_file("./src/drugs.txt").expect("Error encountered while deleting file");
-        File::create("./src/drugs.txt").expect("Error encountered while creating file!");
-        let mut file = OpenOptions::new()
-            .write(true)
-            .append(true)
-            .open("./src/drugs.txt")
-            .unwrap();
-
-        for i in arr.iter_mut() {
-            let n = format!("{}\n", i);
-            let _ = file.write_all(n.as_bytes());
-        }
-    }
     println!("Hit enter to return to main menu: ");
     io::stdin().read_line(&mut String::new()).unwrap();
     main_menu();
     Ok(())
 }
-fn withdraw_drug() {}
+fn withdraw_drug(_db_url: String) {}
