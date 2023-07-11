@@ -95,7 +95,8 @@ fn main_menu() {
     println!("2. Add a new drug");
     println!("3. Add a existing drug");
     println!("4. Withdraw a Drug");
-    println!("5. Exit");
+    println!("5. Remove a Drug");
+    println!("6. Exit");
     let db_url: String = std::env::var("DB_URL").expect("DB_URL must be set.");
 
     let mut choice = String::new();
@@ -110,8 +111,10 @@ fn main_menu() {
     } else if choice == "3" {
         let _ = add_exisiting_drug(db_url);
     } else if choice == "4" {
-        withdraw_drug(db_url);
+        let _ = withdraw_drug(db_url);
     } else if choice == "5" {
+        let _ = delete_drug(db_url);
+    } else if choice == "6" {
         println!("Bye Bye!");
         std::process::exit(0x0100);
     }
@@ -231,6 +234,17 @@ fn withdraw_drug(db_url: String) -> Result<(), Error> {
         }
     }
 
+    println!("Hit enter to return to main menu: ");
+    io::stdin().read_line(&mut String::new()).unwrap();
+    main_menu();
+    Ok(())
+}
+fn delete_drug(db_url: String) -> Result<(), Error> {
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
+    println!("Enter the id of your drug: ");
+    let id = take_input();
+    client.execute("DELETE FROM drugs WHERE id=$1", &[&id])?;
+    println!("Removed!");
     println!("Hit enter to return to main menu: ");
     io::stdin().read_line(&mut String::new()).unwrap();
     main_menu();
