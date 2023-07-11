@@ -180,8 +180,6 @@ fn add_drug(db_url: String) -> Result<(), Error> {
 }
 
 fn add_exisiting_drug(db_url: String) -> Result<(), Error> {
-    // let file: File = File::open("./src/drugs.txt")?;
-    // let reader = BufReader::new(file);
     let mut client = Client::connect(db_url.as_str(), NoTls)?;
     println!("Enter the id of your drug: ");
     let id = take_input();
@@ -195,7 +193,6 @@ fn add_exisiting_drug(db_url: String) -> Result<(), Error> {
         curr_amount = s.parse().unwrap();
         let i = curr_amount + amount;
         let i = i.to_string();
-        println!("{}", i);
         client.execute("UPDATE drugs SET amount=$1 WHERE id=$2", &[&i, &id])?;
     }
 
@@ -204,4 +201,38 @@ fn add_exisiting_drug(db_url: String) -> Result<(), Error> {
     main_menu();
     Ok(())
 }
-fn withdraw_drug(_db_url: String) {}
+fn withdraw_drug(db_url: String) -> Result<(), Error> {
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
+    println!("Enter the id of your drug: ");
+    let id = take_input();
+
+    println!("Enter the amount of your drug you would like to decrease: ");
+    let amount: i32 = take_input().parse().unwrap();
+
+    let mut curr_amount: i32;
+    for row in client.query("SELECT * FROM drugs WHERE id=$1", &[&id])? {
+        let s: String = row.get(1);
+        curr_amount = s.parse().unwrap();
+        if amount >= curr_amount {
+            println!("The amount fo the drug has resulted to 0 or less, we are by default setting it to 0");
+            client.execute("UPDATE drugs SET amount=0 WHERE id=$1", &[&id])?;
+            println!("Would you like to delete the drug from the system? Y or N");
+            let s = take_input();
+            if s == "Y" || s == "y" {
+                client.execute("DELETE FROM drugs WHERE id=$1", &[&id])?;
+                println!("Deleted successfully");
+            } else {
+                println!("Deletion aborted");
+            }
+        } else {
+            let i = curr_amount - amount;
+            let i = i.to_string();
+            client.execute("UPDATE drugs SET amount=$1 WHERE id=$2", &[&i, &id])?;
+        }
+    }
+
+    println!("Hit enter to return to main menu: ");
+    io::stdin().read_line(&mut String::new()).unwrap();
+    main_menu();
+    Ok(())
+}
