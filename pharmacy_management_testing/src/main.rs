@@ -247,36 +247,6 @@ fn list_perscriptions(db_url: String) -> Result<(), Error> {
     main_menu();
     Ok(())
 }
-// fn list_perscriptions(db_url: String) -> Result<(), Error> {
-//     let mut client = Client::connect(db_url.as_str(), NoTls)?;
-//     let db_url_clone = db_url.clone();
-//     for row in client.query(
-//         "SELECT name, dr_name, refill_num, medicines, uid FROM perscriptions",
-//         &[],
-//     )? {
-//         let data = Perscription {
-//             name: row.get(0),
-//             dr_name: row.get(1),
-//             refill_num: row.get(2),
-//             medicines: row.get(3),
-//             uid: row.get(4),
-//         };
-//         let mut text = String::new();
-//         for medicine_id in data.medicines.split("|") {
-//             let medicine = get_medicines_by_id(db_url_clone.to_string(), medicine_id)?;
-//             text.push_str(&format!("{}, ", medicine));
-//         }
-//         let text = text.trim_end_matches(", ").to_string();
-//         println!(
-//             "Name: {}, Dr. Name: {}, Refill Amount: {}, Medicines: {} User ID: {}",
-//             data.name, data.dr_name, data.refill_num, text, data.uid
-//         );
-//     }
-//     println!("Hit enter to return to main menu: ");
-//     io::stdin().read_line(&mut String::new()).unwrap();
-//     main_menu();
-//     Ok(())
-// }
 
 fn get_medicines_by_id(db_url: String, _id: &str) -> Result<String, Error> {
     let mut client = Client::connect(db_url.as_str(), NoTls)?;
