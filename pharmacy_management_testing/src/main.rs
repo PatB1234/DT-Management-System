@@ -18,17 +18,16 @@ struct Perscription {
     uid: String,
 }
 fn main() {
+    dotenv().ok();
+    let db_url: String = std::env::var("DB_URL").expect("DB_URL must be set.");
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-    //let _ = create_tables();
+    // let _ = create_tables(db_url);
     login();
     main_menu();
 }
 
-fn create_tables() -> Result<(), Error> {
-    let mut client = Client::connect(
-        "postgres://jnmuchkv:CSMms0y5t6sD9ESRcqFrFtfdzzOz4BMG@stampy.db.elephantsql.com/jnmuchkv",
-        NoTls,
-    )?;
+fn create_tables(db_url: String) -> Result<(), Error> {
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
 
     client.batch_execute("CREATE TABLE IF NOT EXISTS drugs (name TEXT, amount TEXT, package_date TEXT, expiry_date TEXT, id TEXT)")?;
     client.batch_execute("CREATE TABLE IF NOT EXISTS perscriptions (name TEXT, dr_name TEXT, refill_num TEXT, medicines TEXT, uid TEXT)")?;
