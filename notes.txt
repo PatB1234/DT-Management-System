@@ -1,0 +1,45 @@
+// fn read() -> std::io::Result<()> {
+//     let file: File = File::open("./src/drugs.txt")?;
+
+//     let reader = BufReader::new(file);
+
+//     for line in reader.lines() {
+//         println!("{}", line?);
+//     }
+
+//     Ok(())
+// }
+
+// fn write() {
+//     let mut file = OpenOptions::new()
+//         .write(true)
+//         .open("./src/drugs.txt")
+//         .unwrap();
+//     file.write_all(b"PLACEHOLDER1\n");
+//     file.write_all(b"PLACEHOLDER2\n");
+// }
+// fn main() -> Result<(), Error> {
+//     let mut client = Client::connect("postgresql://postgres:postgres@localhost/library", NoTls)?;
+
+//     client.batch_execute(
+//         "
+//         CREATE TABLE IF NOT EXISTS author (
+//             id              SERIAL PRIMARY KEY,
+//             name            VARCHAR NOT NULL,
+//             country         VARCHAR NOT NULL
+//             )
+//     ",
+//     )?;
+
+//     client.batch_execute(
+//         "
+//         CREATE TABLE IF NOT EXISTS book  (
+//             id              SERIAL PRIMARY KEY,
+//             title           VARCHAR NOT NULL,
+//             author_id       INTEGER NOT NULL REFERENCES author
+//             )
+//     ",
+//     )?;
+
+//     Ok(())
+// }

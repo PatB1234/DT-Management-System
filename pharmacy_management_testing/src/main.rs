@@ -2,51 +2,6 @@ use dotenv::dotenv;
 use postgres::{Client, Error, NoTls};
 use std::io;
 
-// fn read() -> std::io::Result<()> {
-//     let file: File = File::open("./src/drugs.txt")?;
-
-//     let reader = BufReader::new(file);
-
-//     for line in reader.lines() {
-//         println!("{}", line?);
-//     }
-
-//     Ok(())
-// }
-
-// fn write() {
-//     let mut file = OpenOptions::new()
-//         .write(true)
-//         .open("./src/drugs.txt")
-//         .unwrap();
-//     file.write_all(b"PLACEHOLDER1\n");
-//     file.write_all(b"PLACEHOLDER2\n");
-// }
-// fn main() -> Result<(), Error> {
-//     let mut client = Client::connect("postgresql://postgres:postgres@localhost/library", NoTls)?;
-
-//     client.batch_execute(
-//         "
-//         CREATE TABLE IF NOT EXISTS author (
-//             id              SERIAL PRIMARY KEY,
-//             name            VARCHAR NOT NULL,
-//             country         VARCHAR NOT NULL
-//             )
-//     ",
-//     )?;
-
-//     client.batch_execute(
-//         "
-//         CREATE TABLE IF NOT EXISTS book  (
-//             id              SERIAL PRIMARY KEY,
-//             title           VARCHAR NOT NULL,
-//             author_id       INTEGER NOT NULL REFERENCES author
-//             )
-//     ",
-//     )?;
-
-//     Ok(())
-// }
 struct Drugs {
     name: String,
     amount: String,
@@ -54,9 +9,17 @@ struct Drugs {
     expiry_date: String,
     _id: String,
 }
+
+struct Perscription {
+    name: String,
+    dr_name: String,
+    refill_num: String,
+    medicines: String,
+    uid: String,
+}
 fn main() {
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-    let _ = create_tables();
+    //let _ = create_tables();
     login();
     main_menu();
 }
@@ -68,6 +31,7 @@ fn create_tables() -> Result<(), Error> {
     )?;
 
     client.batch_execute("CREATE TABLE IF NOT EXISTS drugs (name TEXT, amount TEXT, package_date TEXT, expiry_date TEXT, id TEXT)")?;
+    client.batch_execute("CREATE TABLE IF NOT EXISTS perscriptions (name TEXT, dr_name TEXT, refill_num TEXT, medicines TEXT, uid TEXT)")?;
 
     Ok(())
 }
@@ -96,7 +60,8 @@ fn main_menu() {
     println!("3. Add a existing drug");
     println!("4. Withdraw a Drug");
     println!("5. Remove a Drug");
-    println!("6. Exit");
+    println!("6. List all perscriptions (This may take a few minutes)");
+    println!("7. Exit");
     let db_url: String = std::env::var("DB_URL").expect("DB_URL must be set.");
 
     let mut choice = String::new();
@@ -115,6 +80,8 @@ fn main_menu() {
     } else if choice == "5" {
         let _ = delete_drug(db_url);
     } else if choice == "6" {
+        let _ = list_perscriptions(db_url);
+    } else if choice == "7" {
         println!("Bye Bye!");
         std::process::exit(0x0100);
     }
@@ -249,4 +216,71 @@ fn delete_drug(db_url: String) -> Result<(), Error> {
     io::stdin().read_line(&mut String::new()).unwrap();
     main_menu();
     Ok(())
+}
+fn list_perscriptions(db_url: String) -> Result<(), Error> {
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
+    let db_url_clone = db_url.clone();
+    for row in client.query(
+        "SELECT name, dr_name, refill_num, medicines, uid FROM perscriptions",
+        &[],
+    )? {
+        let data = Perscription {
+            name: row.get(0),
+            dr_name: row.get(1),
+            refill_num: row.get(2),
+            medicines: row.get(3),
+            uid: row.get(4),
+        };
+        let text = data
+            .medicines
+            .split("|")
+            .map(|medicine_id| get_medicines_by_id(db_url_clone.to_string(), medicine_id))
+            .collect::<Result<Vec<_>, _>>()?
+            .join(", ");
+        println!(
+            "Name: {}, Dr. Name: {}, Refill Amount: {}, Medicines: {} User ID: {}",
+            data.name, data.dr_name, data.refill_num, text, data.uid
+        );
+    }
+    println!("Hit enter to return to main menu: ");
+    io::stdin().read_line(&mut String::new()).unwrap();
+    main_menu();
+    Ok(())
+}
+// fn list_perscriptions(db_url: String) -> Result<(), Error> {
+//     let mut client = Client::connect(db_url.as_str(), NoTls)?;
+//     let db_url_clone = db_url.clone();
+//     for row in client.query(
+//         "SELECT name, dr_name, refill_num, medicines, uid FROM perscriptions",
+//         &[],
+//     )? {
+//         let data = Perscription {
+//             name: row.get(0),
+//             dr_name: row.get(1),
+//             refill_num: row.get(2),
+//             medicines: row.get(3),
+//             uid: row.get(4),
+//         };
+//         let mut text = String::new();
+//         for medicine_id in data.medicines.split("|") {
+//             let medicine = get_medicines_by_id(db_url_clone.to_string(), medicine_id)?;
+//             text.push_str(&format!("{}, ", medicine));
+//         }
+//         let text = text.trim_end_matches(", ").to_string();
+//         println!(
+//             "Name: {}, Dr. Name: {}, Refill Amount: {}, Medicines: {} User ID: {}",
+//             data.name, data.dr_name, data.refill_num, text, data.uid
+//         );
+//     }
+//     println!("Hit enter to return to main menu: ");
+//     io::stdin().read_line(&mut String::new()).unwrap();
+//     main_menu();
+//     Ok(())
+// }
+
+fn get_medicines_by_id(db_url: String, _id: &str) -> Result<String, Error> {
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
+    let name = client.query("SELECT name FROM drugs WHERE id=$1", &[&_id])?;
+    let s: String = name.iter().next().unwrap().get(0);
+    Ok(s)
 }
