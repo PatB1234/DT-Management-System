@@ -2,38 +2,38 @@ use dotenv::dotenv;
 use postgres::{Client, Error, NoTls};
 use std::io;
 
-struct Drugs {
+struct Item {
     name: String,
     amount: String,
-    pckg_date: String,
-    expiry_date: String,
-    _id: String,
+    id: String,
+    location: String,
 }
 
-struct Perscription {
-    name: String,
-    dr_name: String,
-    refill_num: String,
-    medicines: String,
-    uid: String,
-}
 fn main() {
-    // dotenv().ok();
-    // let db_url: String = std::env::var("DB_URL").expect("DB_URL must be set.");
-    // let _ = create_tables(db_url);
+    dotenv().ok();
+    let db_url: String = std::env::var("DB_URL").expect("DB_URL must be set.");
+    let _ = create_tables(db_url);
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-    login();
-    main_menu();
+    let res = login();
+    if res {
+        main_menu();
+    } else {
+        println!("Could not login in, details incorrect");
+        println!("Hit enter");
+        io::stdin().read_line(&mut String::new()).unwrap();
+        std::process::exit(0x0100);
+    }
 }
 
-// fn create_tables(db_url: String) -> Result<(), Error> {
-//     let mut client = Client::connect(db_url.as_str(), NoTls)?;
+fn create_tables(db_url: String) -> Result<(), Error> {
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
 
-//     client.batch_execute("CREATE TABLE IF NOT EXISTS drugs (name TEXT, amount TEXT, package_date TEXT, expiry_date TEXT, id TEXT)")?;
-//     client.batch_execute("CREATE TABLE IF NOT EXISTS perscriptions (name TEXT, dr_name TEXT, refill_num TEXT, medicines TEXT, uid TEXT)")?;
+    client.batch_execute(
+        "CREATE TABLE IF NOT EXISTS items (name TEXT, amount TEXT, id TEXT, location TEXT)",
+    )?;
 
-//     Ok(())
-// }
+    Ok(())
+}
 
 // fn print_type_of<T>(_: &T) {
 //     println!("{}", std::any::type_name::<T>())
@@ -49,22 +49,32 @@ fn take_input() -> String {
     u_input
 }
 
-fn login() {}
+fn login() -> bool {
+    println!("Username: ");
+    let username = take_input();
+
+    println!("Password: ");
+    let password = take_input();
+
+    if username == "DT" && password == "Management" {
+        true
+    } else {
+        false
+    }
+}
 
 fn main_menu() {
     dotenv().ok();
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
     println!("Main Menu");
     println!("What would you like to do?");
-    println!("1. List All Drugs");
-    println!("2. Add a new drug");
-    println!("3. Add a existing drug");
-    println!("4. Withdraw a Drug");
-    println!("5. Remove a Drug");
-    println!("6. List all perscriptions (This may take a few minutes)");
-    println!("7. Add perscription");
-    println!("8. Auto Withdraw Perscriptions");
-    println!("9. Exit");
+    println!("1. List All Items");
+    println!("2. Add a new item");
+    println!("3. Add an existing item");
+    println!("4. Withdraw an item");
+    println!("5. Remove an item");
+    println!("6. Change location of item");
+    println!("7. Exit");
     let db_url: String = std::env::var("DB_URL").expect("DB_URL must be set.");
 
     let mut choice = String::new();
@@ -73,146 +83,135 @@ fn main_menu() {
         .expect("Failed to read line");
     let choice = choice.trim_end();
     if choice == "1" {
-        let _ = list_drug(db_url);
+        let _ = list_items(db_url);
         println!("Hit enter to return to main menu: ");
         io::stdin().read_line(&mut String::new()).unwrap();
         main_menu();
     } else if choice == "2" {
-        let _ = add_drug(db_url);
+        let _ = add_item(db_url);
         println!("Hit enter to return to main menu: ");
         io::stdin().read_line(&mut String::new()).unwrap();
         main_menu();
     } else if choice == "3" {
-        let _ = add_exisiting_drug(db_url);
+        let _ = add_exisiting_item(db_url);
         println!("Hit enter to return to main menu: ");
         io::stdin().read_line(&mut String::new()).unwrap();
         main_menu();
     } else if choice == "4" {
-        let _ = withdraw_drug(db_url);
+        let _ = withdraw_item(db_url);
         println!("Hit enter to return to main menu: ");
         io::stdin().read_line(&mut String::new()).unwrap();
         main_menu();
     } else if choice == "5" {
-        let _ = delete_drug(db_url);
+        let _ = remove_item(db_url);
         println!("Hit enter to return to main menu: ");
         io::stdin().read_line(&mut String::new()).unwrap();
         main_menu();
     } else if choice == "6" {
-        let _ = list_perscriptions(db_url);
+        let _ = change_location_item(db_url);
         println!("Hit enter to return to main menu: ");
         io::stdin().read_line(&mut String::new()).unwrap();
         main_menu();
     } else if choice == "7" {
-        let _ = add_perscription(db_url);
-        println!("Hit enter to return to main menu: ");
-        io::stdin().read_line(&mut String::new()).unwrap();
-        main_menu();
-    } else if choice == "8" {
-        let _ = auto_withdraw(db_url);
-        println!("Hit enter to return to main menu: ");
-        io::stdin().read_line(&mut String::new()).unwrap();
-        main_menu();
-    } else if choice == "9" {
         println!("Bye Bye!");
         std::process::exit(0x0100);
     }
 }
 
-fn list_drug(db_url: String) -> Result<(), Error> {
+fn list_items(db_url: String) -> Result<(), Error> {
     let mut client = Client::connect(db_url.as_str(), NoTls)?;
 
-    for row in client.query(
-        "SELECT name, amount, package_date, expiry_date, id FROM drugs",
-        &[],
-    )? {
-        let data = Drugs {
+    for row in client.query("SELECT name, amount, id, location FROM items", &[])? {
+        let data = Item {
             name: row.get(0),
             amount: row.get(1),
-            pckg_date: row.get(2),
-            expiry_date: row.get(3),
-            _id: row.get(4),
+            id: row.get(2),
+            location: row.get(3),
         };
         println!(
-            "Name: {} Amount: {} Packaged Date: {} Expiry Date: {} ID: {}",
-            data.name, data.amount, data.pckg_date, data.expiry_date, data._id
+            "Name: {} Amount: {} ID: {} Location: {}",
+            data.name, data.amount, data.id, data.location
         )
     }
     Ok(())
 }
 
-fn add_drug(db_url: String) -> Result<(), Error> {
+fn add_item(db_url: String) -> Result<(), Error> {
     let mut client = Client::connect(db_url.as_str(), NoTls)?;
 
-    println!("Enter the name of your drug: ");
-    let names = take_input();
+    println!("Enter the name of your item: ");
+    let name = take_input();
 
-    println!("Enter the amount of your drug: ");
-    let amounts = take_input();
+    println!("Enter the amount of your item: ");
+    let amount = take_input();
 
-    println!("Enter the packaged date: ");
-    let packaged = take_input();
-
-    println!("Enter the expiry date: ");
-    let expiry = take_input();
+    println!("Enter the location: ");
+    let location = take_input();
 
     println!("Enter the id: ");
-    let _ids = take_input();
-    let data = Drugs {
-        name: names,
-        amount: amounts,
-        pckg_date: packaged,
-        expiry_date: expiry,
-        _id: _ids,
+    let id = take_input();
+
+    let data = Item {
+        name: name,
+        amount: amount,
+        id: id,
+        location: location,
     };
 
     client.execute(
-            "INSERT INTO drugs (name, amount, package_date, expiry_date, id) VALUES ($1, $2, $3, $4, $5)",
-            &[&data.name, &data.amount, &data.pckg_date, &data.expiry_date, &data._id],
-        )?;
+        "INSERT INTO items (name, amount, id, location) VALUES ($1, $2, $3, $4)",
+        &[&data.name, &data.amount, &data.id, &data.location],
+    )?;
 
     Ok(())
 }
 
-fn add_exisiting_drug(db_url: String) -> Result<(), Error> {
+fn add_exisiting_item(db_url: String) -> Result<(), Error> {
     let mut client = Client::connect(db_url.as_str(), NoTls)?;
-    println!("Enter the id of your drug: ");
+    println!("Enter the id of your item: ");
     let id = take_input();
 
-    println!("Enter the amount of your drug: ");
-    let amount: i32 = take_input().parse().unwrap();
-
-    let mut curr_amount: i32;
-    for row in client.query("SELECT * FROM drugs WHERE id=$1", &[&id])? {
-        let s: String = row.get(1);
-        curr_amount = s.parse().unwrap();
-        let i = curr_amount + amount;
-        let i = i.to_string();
-        client.execute("UPDATE drugs SET amount=$1 WHERE id=$2", &[&i, &id])?;
-    }
-
-    Ok(())
-}
-
-fn withdraw_drug(db_url: String) -> Result<(), Error> {
-    let mut client = Client::connect(db_url.as_str(), NoTls)?;
-    println!("Enter the id of your drug: ");
-    let id = take_input();
-
-    println!("Enter the amount of your drug you would like to decrease: ");
+    println!("Enter the amount of your item: ");
     let amount: i32 = take_input().parse().unwrap();
 
     let curr_amount: i32;
-    let row = client.query("SELECT * FROM drugs WHERE id=$1", &[&id])?;
+    let row = client.query("SELECT * FROM items WHERE id=$1", &[&id])?;
+    if row.is_empty() {
+        println!("Could not find item with the ID {}", id);
+    } else {
+        let s: String = row.iter().next().unwrap().get(1);
+        curr_amount = s.parse().unwrap();
+        let i = curr_amount + amount;
+        let i = i.to_string();
+        client.execute("UPDATE items SET amount=$1 WHERE id=$2", &[&i, &id])?;
+    }
+    Ok(())
+}
+
+fn withdraw_item(db_url: String) -> Result<(), Error> {
+    let mut client = Client::connect(db_url.as_str(), NoTls)?;
+    println!("Enter the id of your item: ");
+    let id = take_input();
+
+    println!("Enter the amount of your item you would like to decrease: ");
+    let amount: i32 = take_input().parse().unwrap();
+
+    let curr_amount: i32;
+    let row = client.query("SELECT * FROM items WHERE id=$1", &[&id])?;
     if !row.is_empty() {
         let s: String = row.iter().next().unwrap().get(1);
         curr_amount = s.parse().unwrap();
-        if amount >= curr_amount {
-            println!("The amount fo the drug has resulted to 0 or less, we are by default setting it to 0");
-            client.execute("UPDATE drugs SET amount=0 WHERE id=$1", &[&id])?;
-            println!("Would you like to delete the drug from the system? Y or N");
+        if amount > curr_amount {
+            println!(
+                "There is not enough of the item to remove, nothing has been removed as a result"
+            );
+        } else if amount == curr_amount {
+            println!("The amount of the item has resulted to 0, we are by default setting it to 0");
+            client.execute("UPDATE items SET amount=0 WHERE id=$1", &[&id])?;
+            println!("Would you like to delete the item from the system? Y or N");
             let s = take_input();
             if s == "Y" || s == "y" {
-                client.execute("DELETE FROM drugs WHERE id=$1", &[&id])?;
+                client.execute("DELETE FROM items WHERE id=$1", &[&id])?;
                 println!("Deleted successfully");
             } else {
                 println!("Deletion aborted");
@@ -220,169 +219,42 @@ fn withdraw_drug(db_url: String) -> Result<(), Error> {
         } else {
             let i = curr_amount - amount;
             let i = i.to_string();
-            client.execute("UPDATE drugs SET amount=$1 WHERE id=$2", &[&i, &id])?;
+            client.execute("UPDATE items SET amount=$1 WHERE id=$2", &[&i, &id])?;
         }
     } else {
-        println!("Could not find drug with id: {}", id);
+        println!("Could not find item with id: {}", id);
     }
     Ok(())
 }
 
-fn delete_drug(db_url: String) -> Result<(), Error> {
+fn remove_item(db_url: String) -> Result<(), Error> {
     let mut client = Client::connect(db_url.as_str(), NoTls)?;
-    println!("Enter the id of your drug: ");
+    println!("Enter the id of your item: ");
     let id = take_input();
-    client.execute("DELETE FROM drugs WHERE id=$1", &[&id])?;
+    println!("Note, this will delete every single item with the specified ID: Say Y to continue");
+
+    client.execute("DELETE FROM items WHERE id=$1", &[&id])?;
     println!("Removed!");
+
     Ok(())
 }
 
-fn list_perscriptions(db_url: String) -> Result<(), Error> {
+fn change_location_item(db_url: String) -> Result<(), Error> {
     let mut client = Client::connect(db_url.as_str(), NoTls)?;
-    let db_url_clone = db_url.clone();
-    for row in client.query(
-        "SELECT name, dr_name, refill_num, medicines, uid FROM perscriptions",
-        &[],
-    )? {
-        let data = Perscription {
-            name: row.get(0),
-            dr_name: row.get(1),
-            refill_num: row.get(2),
-            medicines: row.get(3),
-            uid: row.get(4),
-        };
-        let text = data
-            .medicines
-            .split("|")
-            .map(|medicine_id| get_medicines_by_id(db_url_clone.to_string(), medicine_id))
-            .collect::<Result<Vec<_>, _>>()?
-            .join(", ");
-        println!(
-            "Name: {}, Dr. Name: {}, Refill Amount: {}, Medicines: {} User ID: {}",
-            data.name, data.dr_name, data.refill_num, text, data.uid
-        );
-    }
-    Ok(())
-}
+    println!("Enter the id of your item: ");
+    let id = take_input();
 
-fn get_medicines_by_id(db_url: String, _id: &str) -> Result<String, Error> {
-    let mut client = Client::connect(db_url.as_str(), NoTls)?;
-    let name = client.query("SELECT name FROM drugs WHERE id=$1", &[&_id])?;
-    let s: String = name.iter().next().unwrap().get(0);
-    Ok(s)
-}
+    println!("Enter the new location of your item: ");
+    let location = take_input();
 
-fn add_perscription(db_url: String) -> Result<(), Error> {
-    let mut client = Client::connect(db_url.as_str(), NoTls)?;
-
-    println!("Enter the name of the patient: ");
-    let names = take_input();
-
-    println!("Enter the name of the Dr: ");
-    let dr_name = take_input();
-
-    println!("Enter the amount of refills for this perscription: ");
-    let refill = take_input();
-
-    println!("Enter the id of the user: ");
-    let uid = take_input();
-
-    println!("Enter the medicines: Format is x|y|z with the numbers being the medicine ids, you can add as many as you like but no duplicates");
-    let medicines = take_input();
-
-    let data = Perscription {
-        name: names,
-        dr_name: dr_name,
-        refill_num: refill,
-        medicines: medicines,
-        uid: uid,
-    };
-
-    client.execute(
-            "INSERT INTO perscriptions (name, dr_name, refill_num, medicines, uid) VALUES ($1, $2, $3, $4, $5)",
-            &[&data.name, &data.dr_name, &data.refill_num, &data.medicines, &data.uid],
+    let row = client.query("SELECT * FROM items WHERE id=$1", &[&id])?;
+    if row.is_empty() {
+        println!("Could not find item with the ID {}", id);
+    } else {
+        client.execute(
+            "UPDATE items SET location=$1 WHERE id=$2",
+            &[&location, &id],
         )?;
-
-    Ok(())
-}
-
-fn auto_withdraw(db_url: String) -> Result<(), Error> {
-    let mut client = Client::connect(db_url.as_str(), NoTls)?;
-    println!("Enter the user ID: ");
-    let uid = take_input();
-    let row = client.query(
-        "SELECT name, dr_name, refill_num, medicines, uid FROM perscriptions WHERE uid=$1",
-        &[&uid],
-    )?;
-    let s: String = row.iter().next().unwrap().get(3);
-    let refill_num: String = row.iter().next().unwrap().get(2);
-    let mut refill_num: i32 = refill_num.parse().unwrap();
-
-    if refill_num == 0 {
-        println!("There are no more due refills");
-    } else {
-        let text = s.split("|").collect::<Vec<&str>>();
-        for i in 0..text.len() {
-            let _ = auto_withdraw_function(db_url.to_string(), text[i].to_string());
-        }
-        refill_num -= 1;
-        println!("{}", refill_num);
-        if refill_num == 0 {
-            println!(
-                "The refill amount is now 0, would you like to delete the speicifed perscription? Y or N"
-            );
-            let choice = take_input();
-            if choice == "y" || choice == "Y" {
-                client.execute("DELETE FROM perscriptions WHERE uid=$1", &[&uid])?;
-            } else {
-                client.execute(
-                    "UPDATE perscriptions SET refill_num=$1 WHERE uid=$2",
-                    &[&refill_num, &uid],
-                )?;
-            }
-        } else {
-            client.execute(
-                "UPDATE perscriptions SET refill_num=$1 WHERE uid=$2",
-                &[&refill_num.to_string(), &uid],
-            )?;
-        }
-    }
-    Ok(())
-}
-
-fn auto_withdraw_function(db_url: String, id: String) -> Result<(), Error> {
-    let mut client = Client::connect(db_url.as_str(), NoTls)?;
-    let amount: i32 = 1;
-    let curr_amount: i32;
-
-    let row = client.query("SELECT * FROM drugs WHERE id=$1", &[&id])?;
-    if !row.is_empty() {
-        let s: String = row.iter().next().unwrap().get(1);
-        curr_amount = s.parse().unwrap();
-        if curr_amount != 0 {
-            if curr_amount == 1 {
-                println!(
-                    "The amount of the drug with id {} has resulted to 0, we are by default setting it to 0", id
-                );
-                client.execute("UPDATE drugs SET amount=0 WHERE id=$1", &[&id])?;
-                println!("Would you like to delete the drug from the system? Y or N");
-                let s = take_input();
-                if s == "Y" || s == "y" {
-                    client.execute("DELETE FROM drugs WHERE id=$1", &[&id])?;
-                    println!("Deleted successfully");
-                } else {
-                    println!("Deletion aborted");
-                }
-            } else {
-                let i = curr_amount - amount;
-                let i = i.to_string();
-                client.execute("UPDATE drugs SET amount=$1 WHERE id=$2", &[&i, &id])?;
-            }
-        } else {
-            println!("The drug with id {} has a current amount of 0", id);
-        }
-    } else {
-        println!("Could not find drug with id: {}", id);
     }
     Ok(())
 }
