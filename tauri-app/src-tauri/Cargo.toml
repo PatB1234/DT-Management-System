@@ -1,9 +1,9 @@
 [package]
-name = "tauri-app"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
+name = "dt-management-system"
+version = "0.1.0"
+description = "A management System for my schools dt department"
+authors = ["Redstonebear"]
+license = "MIT"
 repository = ""
 edition = "2021"
 
@@ -13,7 +13,7 @@ edition = "2021"
 tauri-build = { version = "1.4", features = [] }
 
 [dependencies]
-tauri = { version = "1.4", features = ["shell-open"] }
+tauri = { version = "1.4", features = [ "api-all"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 dotenv = "0.15.0"
