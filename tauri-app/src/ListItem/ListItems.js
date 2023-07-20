@@ -25,11 +25,9 @@ async function run() {
   // each entry here represents one column
   let contents = JSON.stringify(await invoke("list_items"));
   contents = JSON.parse(contents)
-  console.log(typeof (contents))
   for (let key in contents) {
     if (contents.hasOwnProperty(key)) {
       const value = contents[key];
-      console.log(`Key: ${key}, Value: ${value['name']}`);
       rowData.push({ id: value['id'], name: value['name'], amount: value['amount'], location: value['location'] });
     }
   }

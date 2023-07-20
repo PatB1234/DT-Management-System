@@ -4,7 +4,6 @@ let id;
 
 async function removeItem() {
 
-    console.log("Test")
     await invoke('remove_item', { id: id.value });
 }
 
