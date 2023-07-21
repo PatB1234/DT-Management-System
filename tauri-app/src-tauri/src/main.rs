@@ -237,6 +237,9 @@ fn withdraw_item(id: String, amount: String, delete_y: String) -> Result<String,
                     .map_err(|err| err.to_string())?;
                 return Ok(String::from("Deleted successfully").into());
             } else {
+                client
+                    .execute("UPDATE items SET amount=0 WHERE id=$1", &[&id])
+                    .map_err(|err| err.to_string())?;
                 return Ok(String::from("Deletion aborted").into());
             }
         } else {
@@ -250,7 +253,7 @@ fn withdraw_item(id: String, amount: String, delete_y: String) -> Result<String,
         let s = format!("Could not find item with id: {}", id);
         return Ok(s.into());
     }
-    Ok(String::from("Error").into())
+    Ok(String::from("Worked!").into())
 }
 
 #[tauri::command]
