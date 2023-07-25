@@ -1,0 +1,53 @@
+body {
+
+    background-color: rgba(18, 77, 84, 1);
+}
+
+h1 {
+
+    color: rgba(214, 196, 176, 1);
+    height: auto;
+    font-style: Regular;
+    text-align: center;
+    font-family: Roboto Mono;
+    font-weight: 400;
+    line-height: normal;
+    font-stretch: normal;
+    text-decoration: none;
+    font-size: 64px;
+}
+
+h2 {
+
+    color: rgba(214, 196, 176, 1);
+    height: auto;
+    font-style: Regular;
+    text-align: center;
+    font-family: Roboto Mono;
+    font-weight: 400;
+    line-height: normal;
+    font-stretch: normal;
+    text-decoration: none;
+    font-size: 64px;
+}
+
+h3 {
+
+    color: rgba(214, 196, 176, 1);
+    height: auto;
+    font-style: Regular;
+    text-align: center;
+    font-family: Roboto Mono;
+    font-weight: 400;
+    line-height: normal;
+    font-stretch: normal;
+    text-decoration: none;
+    font-size: 40px;
+    text-decoration: none;
+}
+
+a {
+
+    text-decoration: none;
+    color: rgba(214, 196, 176, 1);
+}
