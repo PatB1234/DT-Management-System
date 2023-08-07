@@ -16,3 +16,42 @@ def get_home():
 
     return RedirectResponse("/ui/index.html", status.HTTP_302_FOUND)
 
+@app.post("/create_tables")
+def post_create_tables():
+
+    create_tables()
+
+@app.post("/clear_tables")
+def post_clear_tables():
+
+    clear_tables()
+
+@app.get("/items")
+def get_items():
+
+    return list_items()
+
+@app.post("/add_items")
+def post_add_items(name: str, amount: str, id: str , location: str):
+
+    return add_item(name, amount, id, location)
+
+@app.post("/add_existing_item")
+def post_add_exisiting_item(id: str, amount: str):
+
+    return add_exisiting_item(id, amount)
+
+@app.post("/withdraw_item")
+def post_withdraw_item(id: str, amount: str):
+
+    return withdraw_item(id, amount)
+
+@app.post("/remove_item")
+def post_remove_item(id: str):
+    
+    return remove_item(id)
+
+@app.post("/change_location")
+def post_change_location(id: str, location: str):
+
+    return change_location_item(id, location)

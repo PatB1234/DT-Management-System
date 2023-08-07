@@ -1,9 +1,0 @@
-C:\Users\mpbin\Desktop\Coding\C#\PharmacyManagmentSystem\pharmacy_management_testing\target\debug\deps\postgres_types-8900b519537775eb.rmeta: C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\lib.rs C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\pg_lsn.rs C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\private.rs C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\special.rs C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\type_gen.rs
-
-C:\Users\mpbin\Desktop\Coding\C#\PharmacyManagmentSystem\pharmacy_management_testing\target\debug\deps\postgres_types-8900b519537775eb.d: C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\lib.rs C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\pg_lsn.rs C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\private.rs C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\special.rs C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\type_gen.rs
-
-C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\lib.rs:
-C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\pg_lsn.rs:
-C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\private.rs:
-C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\special.rs:
-C:\Users\mpbin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\postgres-types-0.2.5\src\type_gen.rs:
