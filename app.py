@@ -44,9 +44,9 @@ async def post_add_existing_item(item: Item1):
     
 
 @app.post("/withdraw_item")
-def post_withdraw_item(id: str, amount: str):
+def post_withdraw_item(item: Item1):
 
-    return withdraw_item(id, amount)
+    return withdraw_item(item.id, item.amount)
 
 @app.post("/remove_item")
 def post_remove_item(id: str):

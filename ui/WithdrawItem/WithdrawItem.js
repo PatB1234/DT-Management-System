@@ -4,7 +4,7 @@ function submitForm(event) {
     event.preventDefault(true);
     var id = document.getElementById("id");
     var amount = document.getElementById("amount");
-    axios.post('/add_existing_item', {
+    axios.post('/withdraw_item', {
 
         id: id.value,
         amount: amount.value
