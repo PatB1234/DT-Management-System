@@ -16,6 +16,10 @@ class Item(BaseModel):
     id: str
     location: str
 
+class Item1(BaseModel):
+
+    id: str
+    amount: str    
 def create_tables():
 
     database = driver.connect(DATABASE_URL)
@@ -59,7 +63,6 @@ def add_exisiting_item(id: str, amount: str):
     if res == []:
      return f"Could not find item with the ID {id}"
     else:
-
         cursor.execute(f"UPDATE items SET amount='{str(int(res[0][1]) + int(amount))}' WHERE id='{id}';")
         database.commit()
     

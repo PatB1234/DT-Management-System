@@ -38,9 +38,10 @@ def post_add_items(name: str = Form(...), amount: str = Form(...), id: str = For
     return RedirectResponse("/ui/AddItem.html", status.HTTP_302_FOUND)
 
 @app.post("/add_existing_item")
-def post_add_exisiting_item(id: str, amount: str):
-
-    return add_exisiting_item(id, amount)
+async def post_add_existing_item(item: Item1):
+    
+    return add_exisiting_item(item.id, item.amount)
+    
 
 @app.post("/withdraw_item")
 def post_withdraw_item(id: str, amount: str):
