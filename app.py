@@ -32,9 +32,10 @@ def get_items():
     return list_items()
 
 @app.post("/add_items")
-def post_add_items(name: str, amount: str, id: str , location: str):
+def post_add_items(name: str = Form(...), amount: str = Form(...), id: str = Form(...) , location: str = Form(...)):
 
-    return add_item(name, amount, id, location)
+    add_item(name, amount, id, location)
+    return RedirectResponse("/ui/AddItem.html", status.HTTP_302_FOUND)
 
 @app.post("/add_existing_item")
 def post_add_exisiting_item(id: str, amount: str):
