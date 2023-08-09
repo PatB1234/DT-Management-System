@@ -124,3 +124,4 @@ def change_location_item(id: str, location: str):
         database.commit()
         return "Successful"
 
+create_tables()
