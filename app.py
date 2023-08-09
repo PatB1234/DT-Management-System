@@ -49,11 +49,11 @@ def post_withdraw_item(item: Item1):
     return withdraw_item(item.id, item.amount)
 
 @app.post("/remove_item")
-def post_remove_item(id: str):
+def post_remove_item(item: Item2):
     
-    return remove_item(id)
+    return remove_item(item.id)
 
 @app.post("/change_location")
-def post_change_location(id: str, location: str):
+def post_change_location(item: Item3):
 
-    return change_location_item(id, location)
+    return change_location_item(item.id, item.location)

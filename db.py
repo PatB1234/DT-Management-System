@@ -20,6 +20,14 @@ class Item1(BaseModel):
 
     id: str
     amount: str    
+class Item2(BaseModel):
+
+    id: str
+
+class Item3(BaseModel):
+
+    id: str
+    location: str
 def create_tables():
 
     database = driver.connect(DATABASE_URL)
@@ -91,8 +99,15 @@ def remove_item(id: str):
 
     database = driver.connect(DATABASE_URL)
     cursor = database.cursor()
-    cursor.execute(f"DELETE FROM items WHERE id='{id}';")
-    database.commit()
+    res = cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
+    res = res.fetchall()
+    if res == []:
+
+        return f"Could not find item with id: {id}"
+    else:
+        cursor.execute(f"DELETE FROM items WHERE id='{id}';")
+        database.commit()
+        return "Successful"
 
 def change_location_item(id: str, location: str):
 
