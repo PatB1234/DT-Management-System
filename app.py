@@ -8,11 +8,21 @@ from starlette.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
 from db import *
 
+class Login(BaseModel):
+
+    username: str
+    password: str
+
 app = FastAPI()
 app.mount("/ui", StaticFiles(directory = "ui"), name = "ui")
 
 @app.get("/")
 def get_home():
+
+    return RedirectResponse("/ui/login.html", status.HTTP_302_FOUND)
+
+@app.get("/index")
+def get_index():
 
     return RedirectResponse("/ui/index.html", status.HTTP_302_FOUND)
 
@@ -20,6 +30,16 @@ def get_home():
 def post_create_tables():
 
     create_tables()
+
+@app.post("/check_login")
+def check_login(login: Login):
+
+    if (login.usename == "Management" and login.password == "System"):
+
+        return "Correct"
+    else:
+
+        return "WRONG"
 
 @app.post("/clear_tables")
 def post_clear_tables():
