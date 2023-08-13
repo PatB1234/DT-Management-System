@@ -11,32 +11,10 @@ from db import *
 app = FastAPI()
 app.mount("/ui", StaticFiles(directory = "ui"), name = "ui")
 
-class Login(BaseModel):
-
-    username: str
-    password: str
-
 @app.get("/")
-def get_login():
-
-    return RedirectResponse("/ui/login.html", status.HTTP_302_FOUND)
-
-@app.get("/get_home")
 def get_home():
 
     return RedirectResponse("/ui/index.html", status.HTTP_302_FOUND)
-
-@app.post("/check_login")
-def check_login(details: Login):
-
-    if details.username == "Management" and details.password == "System":
-
-        return "Correct!"
-    else:
-
-        return "INCORRECT"
-
-
 
 @app.post("/create_tables")
 def post_create_tables():
