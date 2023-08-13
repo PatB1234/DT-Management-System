@@ -6,9 +6,19 @@ from datetime import date, datetime, timedelta
 import random
 import sqlite3 as driver
 from sqlite3.dbapi2 import Cursor
+import psycopg2
+import urllib.parse as urlparse 
+from dotenv import load_dotenv
 
-DATABASE_URL = 'db/DTItems.db'
-
+load_dotenv()
+urlparse.uses_netloc.append("postgres")
+url = urlparse.urlparse(os.getenv("DATABASE_URL"))
+conn = psycopg2.connect(database=url.path[1:],
+  user=url.username,
+  password=url.password,
+  host=url.hostname,
+  port=url.port
+)
 class Item(BaseModel):
 
     name: str
@@ -30,21 +40,20 @@ class Item3(BaseModel):
     location: str
 def create_tables():
 
-    database = driver.connect(DATABASE_URL)
-    cursor = database.cursor()
+    cursor = conn.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS items (name TEXT, amount TEXT, id TEXT, location TEXT);")
 
 def clear_tables():
 
-    database = driver.connect(DATABASE_URL)
-    cursor = database.cursor()
+
+    cursor = conn.cursor()
     cursor.execute("DELETE FROM items")
-    database.commit()
+    conn.commit()
 
 def list_items():
 
-    database = driver.connect(DATABASE_URL)
-    cursor = database.cursor()
+
+    cursor = conn.cursor()
     items = cursor.execute("SELECT * FROM  items;")
     items = items.fetchall()
     arr = []
@@ -56,30 +65,30 @@ def list_items():
 
 def add_item(name: str, amount: str, id: str, location: str):
 
-    database = driver.connect(DATABASE_URL)
-    cursor = database.cursor()
+
+    cursor = conn.cursor()
     cursor.execute(f"INSERT INTO items (name, amount, id, location) VALUES ('{name}', '{amount}', '{id}', '{location}');")
-    database.commit()
+    conn.commit()
 
 
 def add_exisiting_item(id: str, amount: str):
 
-    database = driver.connect(DATABASE_URL)
-    cursor = database.cursor()
+
+    cursor = conn.cursor()
     res = cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
     res = res.fetchall()
     if res == []:
      return f"Could not find item with the ID {id}"
     else:
         cursor.execute(f"UPDATE items SET amount='{str(int(res[0][1]) + int(amount))}' WHERE id='{id}';")
-        database.commit()
+        conn.commit()
     
     return "Successful"
 
 def withdraw_item(id: str, amount: str):
 
-    database = driver.connect(DATABASE_URL)
-    cursor = database.cursor()
+
+    cursor = conn.cursor()
     res = cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
     res = res.fetchall()
     if res == []:
@@ -92,13 +101,13 @@ def withdraw_item(id: str, amount: str):
         else:
             
             cursor.execute(f"UPDATE items SET amount='{str(int(res[0][1]) - int(amount))}' WHERE id='{id}';")
-            database.commit()
+            conn.commit()
             return "Successful"
  
 def remove_item(id: str):
 
-    database = driver.connect(DATABASE_URL)
-    cursor = database.cursor()
+
+    cursor = conn.cursor()
     res = cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
     res = res.fetchall()
     if res == []:
@@ -106,13 +115,13 @@ def remove_item(id: str):
         return f"Could not find item with id: {id}"
     else:
         cursor.execute(f"DELETE FROM items WHERE id='{id}';")
-        database.commit()
+        conn.commit()
         return "Successful"
 
 def change_location_item(id: str, location: str):
 
-    database = driver.connect(DATABASE_URL)
-    cursor = database.cursor()
+
+    cursor = conn.cursor()
     res = cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
     res = res.fetchall()
     if res == []:
@@ -121,7 +130,7 @@ def change_location_item(id: str, location: str):
     else:
             
         cursor.execute(f"UPDATE items SET location='{location}' WHERE id='{id}';")
-        database.commit()
+        conn.commit()
         return "Successful"
 
 create_tables()
