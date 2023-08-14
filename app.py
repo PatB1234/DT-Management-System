@@ -34,7 +34,7 @@ def post_create_tables():
 @app.post("/check_login")
 def check_login(login: Login):
 
-    if (login.usename == "Management" and login.password == "System"):
+    if (login.username == "Management" and login.password == "System"):
 
         return "Correct"
     else:
