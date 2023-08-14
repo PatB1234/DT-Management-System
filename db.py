@@ -8,6 +8,7 @@ from sqlite3.dbapi2 import Cursor
 import os
 import urllib.parse as up
 import psycopg2
+
 up.uses_netloc.append("postgres")
 url = up.urlparse(os.environ["DATABASE_URL"])
 conn = psycopg2.connect(database=url.path[1:],
@@ -50,8 +51,8 @@ def clear_tables():
 def list_items():
 
     cursor = conn.cursor()
-    items = cursor.execute("SELECT * FROM  items;")
-    items = items.fetchall()
+    cursor.execute("SELECT * FROM items;")
+    items = cursor.fetchall()
     arr = []
     for item in items:
 
@@ -69,8 +70,8 @@ def add_item(name: str, amount: str, id: str, location: str):
 def add_exisiting_item(id: str, amount: str):
 
     cursor = conn.cursor()
-    res = cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
-    res = res.fetchall()
+    cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
+    res = cursor.fetchall()
     if res == []:
      return f"Could not find item with the ID {id}"
     else:
@@ -82,8 +83,8 @@ def add_exisiting_item(id: str, amount: str):
 def withdraw_item(id: str, amount: str):
 
     cursor = conn.cursor()
-    res = cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
-    res = res.fetchall()
+    cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
+    res = cursor.fetchall()
     if res == []:
 
         return f"Could not find item with id: {id}"
@@ -100,8 +101,8 @@ def withdraw_item(id: str, amount: str):
 def remove_item(id: str):
 
     cursor = conn.cursor()
-    res = cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
-    res = res.fetchall()
+    cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
+    res = cursor.fetchall()
     if res == []:
 
         return f"Could not find item with id: {id}"
@@ -113,8 +114,8 @@ def remove_item(id: str):
 def change_location_item(id: str, location: str):
 
     cursor = conn.cursor()
-    res = cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
-    res = res.fetchall()
+    cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
+    res = cursor.fetchall()
     if res == []:
 
         return f"Could not find item with id: {id}"
@@ -123,4 +124,4 @@ def change_location_item(id: str, location: str):
         cursor.execute(f"UPDATE items SET location='{location}' WHERE id='{id}';")
         conn.commit()
         return "Successful"
-
+    
