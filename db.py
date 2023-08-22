@@ -2,9 +2,10 @@ from pydantic import BaseModel
 from typing import Optional
 from passlib.context import CryptContext
 from datetime import date, datetime, timedelta
+from sqlite3.dbapi2 import Cursor
+from BaseModels import *
 import random
 import sqlite3 as driver
-from sqlite3.dbapi2 import Cursor
 import os
 import urllib.parse as up
 import psycopg2
@@ -17,25 +18,7 @@ password=url.password,
 host=url.hostname,
 port=url.port
 )
-class Item(BaseModel):
 
-    name: str
-    amount: str
-    id: str
-    location: str
-
-class Item1(BaseModel):
-
-    id: str
-    amount: str    
-class Item2(BaseModel):
-
-    id: str
-
-class Item3(BaseModel):
-
-    id: str
-    location: str
 def create_tables():
 
     cursor = conn.cursor()
@@ -125,3 +108,17 @@ def change_location_item(id: str, location: str):
         conn.commit()
         return "Successful"
     
+
+def get_by_name(name: str):
+
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT * FROM items WHERE name='{name}';")
+    res = cursor.fetchall()
+    return res
+
+def get_by_id(id: str):
+
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT * FROM items WHERE id='{id}';")
+    res = cursor.fetchall()
+    return res

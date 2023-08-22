@@ -7,7 +7,7 @@ from pydantic.errors import FrozenSetError
 from starlette.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
 from db import *
-
+from BaseModels import *
 class Login(BaseModel):
 
     username: str
@@ -77,3 +77,13 @@ def post_remove_item(item: Item2):
 def post_change_location(item: Item3):
 
     return change_location_item(item.id, item.location)
+
+@app.post("/search_by_name")
+def post_search_by_name(name: str):
+
+    return get_by_name(name)
+
+@app.post("/search_by_id")
+def post_search_by_id(id: str):
+
+    return get_by_id(id)
