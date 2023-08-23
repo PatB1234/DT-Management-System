@@ -11,7 +11,7 @@ import urllib.parse as up
 import psycopg2
 
 up.uses_netloc.append("postgres")
-url = up.urlparse("postgres://magzcvvo:1VUlCMa4kbE3KrrHYqHKKoZYuUKxu8tK@john.db.elephantsql.com/magzcvvo")
+url = up.urlparse(os.getenv("DATABASE_URL"))
 conn = psycopg2.connect(database=url.path[1:],
 user=url.username,
 password=url.password,
