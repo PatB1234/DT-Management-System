@@ -26,3 +26,11 @@ class Item3(BaseModel):
 
     id: str
     location: str
+
+class ID(BaseModel):
+
+    id: str
+
+class Name(BaseModel):
+
+    name: str

@@ -79,11 +79,11 @@ def post_change_location(item: Item3):
     return change_location_item(item.id, item.location)
 
 @app.post("/search_by_name")
-def post_search_by_name(name: str):
+def post_search_by_name(name: Name):
 
-    return get_by_name(name)
+    return get_by_name(name.name)
 
 @app.post("/search_by_id")
-def post_search_by_id(id: str):
+def post_search_by_id(id: ID):
 
-    return get_by_id(id)
+    return get_by_id(id.id)
